@@ -4,7 +4,7 @@
 import bcrypt from 'bcrypt-promise'
 import sqlite from 'sqlite-async'
 
-
+const saltRounds = 10
 /**
  * Accounts
  * ES6 module that handles registering accounts and logging in.
@@ -17,21 +17,61 @@ class Accounts {
 	constructor(dbName = ':memory:') {
 		return (async() => {
 			this.db = await sqlite.open(dbName)
-			const sql = 'CREATE TABLE IF NOT EXISTS users\
-				(id INTEGER PRIMARY KEY AUTOINCREMENT, user TEXT, pass TEXT, email TEXT);'
+			const sql = 'CREATE TABLE IF NOT EXISTS accounts\
+				(id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, password TEXT, email TEXT);'
 			await this.db.run(sql)
 			return this
 		})()
 	}
+    
+    /**
+	 * register new user
+	 * @param {String} username - the selected username
+	 * @param {String} password - the selected password
+	 * @param {String} email - the selected email
+	 * @returns {Boolean} returns true if the new user has been added
+	 */
+	async register(username, password, email) {
+        Array.from(arguments).forEach( argument => {
+			if(argument === '') throw new Error('missing field')
+		})
+        let sql = `SELECT COUNT(id) as number FROM accounts WHERE username="${username}";`
+		const usernames = await this.db.get(sql)
+        if(usernames.number !== 0) throw new Error(`username "${username}" already in use`)
+        sql = `SELECT COUNT(id) as number FROM accounts WHERE email="${email}";`
+		const emails = await this.db.get(sql)
+		if(emails.number !== 0) throw new Error(`email address "${email}" already in use`)
+		password = await bcrypt.hash(password, saltRounds)
+		sql = `INSERT INTO accounts(username, password, email) VALUES("${username}", "${password}", "${email}")`
+		await this.db.run(sql)
+		return true
+	}
+    
+    /**
+	 * checks login credentials
+	 * @param {String} username - the username to check
+	 * @param {String} password - the password to check
+	 * @returns {Boolean} return true if credentials are valid
+	 */
+	async login(username, password) {
+		let sql = `SELECT count(id) AS number FROM accounts WHERE username="${username}";`
+		const records = await this.db.get(sql)
+		if(!records.number) throw new Error(`username "${username}" is incorrect`)
+		sql = `SELECT password FROM accounts WHERE username = "${username}";`
+		const record = await this.db.get(sql)
+		const valid = await bcrypt.compare(password, record.password)
+		if(valid === false) throw new Error(`incorrect password for user "${username}"`)
+		return true
+	}
 
 	async testSetup() {
-		const defaultPassword = 'p455w0rd'
+		const defaultPassword = '$2b$10$gL33obKAFUT5DK3pEbh72OIHztsWBniBBh.PdeKOrF1yr5KFAsdZO'
 		const users = [
-			`INSERT INTO users(user, pass, email) VALUES("bloggsj", "${defaultPassword}", "bloggs@gmail.com")`,
-			`INSERT INTO users(user, pass, email) VALUES("doej", "${defaultPassword}", "doej@gmail.com")`
+			`INSERT INTO accounts(username, password, email) VALUES("snewj", "${defaultPassword}", "snewj@gmail.com")`,
+			`INSERT INTO accounts(username, password, email) VALUES("starks", "${defaultPassword}", "starks@gmail.com")`
 		]
 		users.forEach( async sql => await this.db.run(sql))
-        const records  = await this.db.run("SELECT * FROM users")
+        const records  = await this.db.run("SELECT * FROM accounts")
         return records
 	}
 
