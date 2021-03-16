@@ -6,7 +6,7 @@ import router from './routes/routes.js'
 
 const app = new Koa()
 
-const defaultPort = 8080
+const defaultPort = 8086
 const port = process.env.PORT || defaultPort
 
 

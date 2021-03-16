@@ -10,7 +10,7 @@ const saltRounds = 10
  * ES6 module that handles registering accounts and logging in.
  */
 class Accounts {
-	/**
+   /**
    * Create an account object
    * @param {String} [dbName=":memory:"] - name of the database file to use.
    */
