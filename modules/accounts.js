@@ -10,25 +10,25 @@ const saltRounds = 10
  * ES6 module that handles registering accounts and logging in.
  */
 class Accounts {
-   /**
+	/**
    * Create an account object
    * @param {String} [dbName=":memory:"] - name of the database file to use.
    */
 	constructor(dbName = ':memory:') {
 		return (async() => {
-            if(typeof dbName === 'string') {
-                this.db = await sqlite.open(dbName)
-            } else {
-                this.db = dbName
-            }
+			if(typeof dbName === 'string') {
+				this.db = await sqlite.open(dbName)
+			} else {
+				this.db = dbName
+			}
 			const sql = 'CREATE TABLE IF NOT EXISTS accounts\
 				(id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, password TEXT, email TEXT);'
 			await this.db.run(sql)
 			return this
 		})()
 	}
-    
-    /**
+
+	/**
 	 * register new user
 	 * @param {String} username - the selected username
 	 * @param {String} password - the selected password
@@ -36,13 +36,13 @@ class Accounts {
 	 * @returns {Boolean} returns true if the new user has been added
 	 */
 	async register(username, password, email) {
-        Array.from(arguments).forEach( argument => {
+		Array.from(arguments).forEach( argument => {
 			if(argument === '') throw new Error('missing field')
 		})
-        let sql = `SELECT COUNT(id) as number FROM accounts WHERE username="${username}";`
+		let sql = `SELECT COUNT(id) as number FROM accounts WHERE username="${username}";`
 		const usernames = await this.db.get(sql)
-        if(usernames.number !== 0) throw new Error(`username "${username}" already in use`)
-        sql = `SELECT COUNT(id) as number FROM accounts WHERE email="${email}";`
+		if(usernames.number !== 0) throw new Error(`username "${username}" already in use`)
+		sql = `SELECT COUNT(id) as number FROM accounts WHERE email="${email}";`
 		const emails = await this.db.get(sql)
 		if(emails.number !== 0) throw new Error(`email address "${email}" already in use`)
 		password = await bcrypt.hash(password, saltRounds)
@@ -50,8 +50,8 @@ class Accounts {
 		await this.db.run(sql)
 		return true
 	}
-    
-    /**
+
+	/**
 	 * checks login credentials
 	 * @param {String} username - the username to check
 	 * @param {String} password - the password to check
@@ -75,8 +75,8 @@ class Accounts {
 			`INSERT INTO accounts(username, password, email) VALUES("starks", "${defaultPassword}", "starks@gmail.com")`
 		]
 		users.forEach( async sql => await this.db.run(sql))
-        const records  = await this.db.run("SELECT * FROM accounts")
-        return records
+		const records = await this.db.run('SELECT * FROM accounts')
+		return records
 	}
 
 	async close() {

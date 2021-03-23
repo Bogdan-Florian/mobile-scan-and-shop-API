@@ -9,7 +9,7 @@ test('REGISTER: register and log in with a valid details', async test => {
 	  const login = await account.login('snowj', 'password')
 		test.is(login, true, 'login failed')
 	} catch(err) {
-        console.log(err.message)
+		console.log(err.message)
 		test.fail('error thrown')
 	} finally {
 		account.close()

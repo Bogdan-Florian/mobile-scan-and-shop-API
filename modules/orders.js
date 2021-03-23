@@ -15,10 +15,10 @@ class Orders {
 	constructor(dbName = ':memory:') {
 		return (async() => {
 			if(typeof dbName === 'string') {
-                this.db = await sqlite.open(dbName)
-            } else {
-                this.db = dbName
-            }
+				this.db = await sqlite.open(dbName)
+			} else {
+				this.db = dbName
+			}
 			const sql = 'CREATE TABLE IF NOT EXISTS orders(\
                         order_number INTEGER PRIMARY KEY AUTOINCREMENT,\
                         status TEXT NOT NULL,\
@@ -39,9 +39,9 @@ class Orders {
      * @returns {Boolean} return true if the order was inserted
      */
 	async insert(status,timeOrder,userId) {
-        let sql = `SELECT COUNT(id) AS count FROM accounts WHERE id = '${userId}';`
-        const id = await this.db.get(sql)
-        if(!id.count) throw new Error('Inexistent user')
+		let sql = `SELECT COUNT(id) AS count FROM accounts WHERE id = '${userId}';`
+		const id = await this.db.get(sql)
+		if(!id.count) throw new Error('Inexistent user')
 		sql = `INSERT INTO orders(status,time_created, user_id) \
                  VALUES('${status}', '${timeOrder}', ${userId});`
 		await this.db.run(sql)
@@ -62,8 +62,8 @@ class Orders {
 		if(!idList.includes(id)) throw new Error('Not existing order')
 		sql = `SELECT order_number, status, time_created, user_id FROM orders WHERE order_number = ${id};`
 		const order = await this.db.get(sql)
-        const date = new Date(order.time_created)
-        order.time_created = date
+		const date = new Date(order.time_created)
+		order.time_created = date
 		return order
 	}
 
@@ -103,7 +103,7 @@ class Orders {
 		console.log('Updated Successfully')
 		return true
 	}
-    
+
 	async close() {
 		await this.db.close()
 	}
