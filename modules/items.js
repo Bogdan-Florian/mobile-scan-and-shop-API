@@ -14,7 +14,11 @@ class Items {
    */
 	constructor(dbName = ':memory:') {
 		return (async() => {
-			this.db = await sqlite.open(dbName)
+			if(typeof dbName === 'string') {
+                this.db = await sqlite.open(dbName)
+            } else {
+                this.db = dbName
+            }
             let sql ='CREATE TABLE IF NOT EXISTS stores (\
                     id INTEGER PRIMARY KEY AUTOINCREMENT,\
                     qr_code TEXT NOT NULL,\
@@ -29,6 +33,15 @@ class Items {
                         barcode TEXT NOT NULL,\
                         store_id INT NOT NULL,\
                         FOREIGN KEY(store_id) REFERENCES stores(id));'
+			await this.db.run(sql)
+            sql = 'CREATE TABLE IF NOT EXISTS order_item(\
+                    order_id INTEGER,\
+                    item_id INTEGER,\
+                    qty INT NOT NULL,\
+                    PRIMARY KEY(order_id, item_id),\
+                    FOREIGN KEY(order_id) REFERENCES orders(order_number),\
+                    FOREIGN KEY(item_id) REFERENCES items(id)\
+                );'
 			await this.db.run(sql)
 			return this
 		})()
@@ -52,7 +65,9 @@ class Items {
 		const users = [
 			'INSERT INTO stores(qr_code, name, address) VALUES("1000000001", "Tesco", "56-66 Cambridge Street")',
 			'INSERT INTO stores(qr_code, name, address) VALUES("1000000002", "Sainsbury", "London Road")',
-            'INSERT INTO items(description, price, qty, barcode, store_id) VALUES("Honey", 1.99, 1, "00369626", 1)'
+            'INSERT INTO items(description, price, qty, barcode, store_id) VALUES("Honey", 1.99, 1, "00369626", 1)',
+            'INSERT INTO items(description, price, qty, barcode, store_id) VALUES("Hell ENERGY DRINK", 0.50, 1, "00797656", 1)',
+            'INSERT INTO items(description, price, qty, barcode, store_id) VALUES("Digestives", 1.79, 1, "00768764", 1)'
 		]
 		users.forEach( async sql => await this.db.run(sql))
         return true

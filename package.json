@@ -21,8 +21,8 @@
 		"jsdoc": "node_modules/.bin/jsdoc -c jsdoc.conf",
 		"linter": "node_modules/.bin/eslint .",
 		"test": "ava",
-        "test:watch":"ava --watch",
-        "test:coverage":"c8 --check-coverage --lines 100 --functions 100 --branches 100 --exclude 'unitTests/**' ava"
+		"test:watch": "ava --watch",
+		"test:coverage": "c8 --check-coverage --lines 100 --functions 100 --branches 100 --exclude 'unitTests/**' ava"
 	},
 	"author": "",
 	"license": "ISC",

@@ -16,7 +16,11 @@ class Accounts {
    */
 	constructor(dbName = ':memory:') {
 		return (async() => {
-			this.db = await sqlite.open(dbName)
+            if(typeof dbName === 'string') {
+                this.db = await sqlite.open(dbName)
+            } else {
+                this.db = dbName
+            }
 			const sql = 'CREATE TABLE IF NOT EXISTS accounts\
 				(id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, password TEXT, email TEXT);'
 			await this.db.run(sql)
