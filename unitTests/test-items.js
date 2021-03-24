@@ -245,7 +245,7 @@ test('GET: get items from the basket', async test => {
 		console.log(err)
 		test.fail('error thrown')
 	} finally {
-		items.close()
+		db.close()
 	}
 })
 
@@ -267,7 +267,7 @@ test('GET: get items inexisting order', async test => {
 		console.log(err)
 		test.is(err.message, 'Inexisting order')
 	} finally {
-		items.close()
+		db.close()
 	}
 })
 
@@ -289,6 +289,116 @@ test('GET: invalid order', async test => {
 		console.log(err)
 		test.is(err.message, 'Invalid data')
 	} finally {
-		items.close()
+		db.close()
 	}
 })
+
+test('UPDATE: change qty of item in basket', async test => {
+	const db = await sqlite.open(':memory:')
+	const accounts = await new Accounts(db)
+	accounts.testSetup()
+	const orders = await new Orders(db)
+	const currentDate = await new Date()
+	await orders.insert('pending', currentDate, 1)
+	const items = await new Items(db)
+	try {
+		await items.testSetup()
+		await items.addItem(1, 1, 1)
+		await items.addItem(1, 2, 1)
+		test.is(await items.changeQty(1, 2, 2), true)
+	} catch(err) {
+		console.log(err)
+		test.fail('error thrown')
+	} finally {
+		db.close()
+	}
+})
+
+test('UPDATE: update items qty - inexisting order', async test => {
+	const db = await sqlite.open(':memory:')
+	const accounts = await new Accounts(db)
+	accounts.testSetup()
+	const orders = await new Orders(db)
+	const currentDate = await new Date()
+	await orders.insert('pending', currentDate, 1)
+	const items = await new Items(db)
+	try {
+		await items.testSetup()
+		await items.addItem(1, 1, 1)
+		await items.addItem(1, 2, 1)
+		await items.changeQty(2, 2, 2)
+		test.fail('error not thrown')
+	} catch(err) {
+		console.log(err)
+		test.is(err.message, 'Inexisting order')
+	} finally {
+		db.close()
+	}
+})
+
+test('UPDATE: update items qty - item not in basket', async test => {
+	const db = await sqlite.open(':memory:')
+	const accounts = await new Accounts(db)
+	accounts.testSetup()
+	const orders = await new Orders(db)
+	const currentDate = await new Date()
+	await orders.insert('pending', currentDate, 1)
+	const items = await new Items(db)
+	try {
+		await items.testSetup()
+		await items.addItem(1, 1, 1)
+		await items.addItem(1, 2, 1)
+		await items.changeQty(1, 3, 2)
+		test.fail('error not thrown')
+	} catch(err) {
+		console.log(err)
+		test.is(err.message, 'Item not in basket')
+	} finally {
+		db.close()
+	}
+})
+
+test('UPDATE: update items qty - qty is not available', async test => {
+	const db = await sqlite.open(':memory:')
+	const accounts = await new Accounts(db)
+	accounts.testSetup()
+	const orders = await new Orders(db)
+	const currentDate = await new Date()
+	await orders.insert('pending', currentDate, 1)
+	const items = await new Items(db)
+	try {
+		await items.testSetup()
+		await items.addItem(1, 1, 1)
+		await items.addItem(1, 2, 1)
+		await items.changeQty(1, 2, 3)
+		test.fail('error not thrown')
+	} catch(err) {
+		console.log(err)
+		test.is(err.message, 'Quantity is not available')
+	} finally {
+		db.close()
+	}
+})
+
+test('UPDATE: update items qty - invalid data', async test => {
+	const db = await sqlite.open(':memory:')
+	const accounts = await new Accounts(db)
+	accounts.testSetup()
+	const orders = await new Orders(db)
+	const currentDate = await new Date()
+	await orders.insert('pending', currentDate, 1)
+	const items = await new Items(db)
+	try {
+		await items.testSetup()
+		await items.addItem(1, 1, 1)
+		await items.addItem(1, 2, 1)
+		await items.changeQty(-1, 0, 2)
+		test.fail('error not thrown')
+	} catch(err) {
+		console.log(err)
+		test.is(err.message, 'Invalid data')
+	} finally {
+		db.close()
+	}
+})
+

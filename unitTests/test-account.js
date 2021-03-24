@@ -125,3 +125,31 @@ test('LOGIN: incorrect password', async test => {
 		account.close()
 	}
 })
+
+test('GET: get ther user\'s id by username', async test => {
+	test.plan(1)
+	const account = await new Accounts()
+	account.testSetup()
+	try {
+		test.deepEqual(await account.getUserId('snewj'), 1)
+	} catch(err) {
+		console.log(err)
+		test.fail('error thrown')
+	} finally {
+		account.close()
+	}
+})
+
+test('GET: inexisting username', async test => {
+	test.plan(1)
+	const account = await new Accounts()
+	account.testSetup()
+	try {
+		await account.getUserId('ivanov')
+		test.fail('error not thrown')
+	} catch(err) {
+		test.is(err.message, 'Inexisting username', 'incorrect error thrown')
+	} finally {
+		account.close()
+	}
+})

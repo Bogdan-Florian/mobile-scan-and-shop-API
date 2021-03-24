@@ -68,6 +68,22 @@ class Accounts {
 		return true
 	}
 
+	/**
+	 * get the user's id by username
+	 * @param {String} username - the username to check
+	 * @returns {Number} returns the user's id
+	 */
+	async getUserId(username) {
+		let sql = 'SELECT username from accounts'
+		const usernames = await this.db.all(sql)
+		const userList = []
+		for(const user of usernames) userList.push(user.username)
+		if(!userList.includes(username)) throw new Error('Inexisting username')
+		sql = `SELECT id FROM accounts WHERE username="${username}";`
+		const data = await this.db.get(sql)
+		return data.id
+	}
+
 	async testSetup() {
 		const defaultPassword = '$2b$10$gL33obKAFUT5DK3pEbh72OIHztsWBniBBh.PdeKOrF1yr5KFAsdZO'
 		const users = [

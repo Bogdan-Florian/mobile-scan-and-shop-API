@@ -122,6 +122,33 @@ class Items {
 		return true
 	}
 
+	/**
+     * updates the quantity of a specific item in the basket
+     * @param {Number} orderNumber - order's id
+     * @param {Number} itemId - the id of the item
+     * @param {Number} qty - the new qty
+     * @returns {Boolean} returns true if updated successfully
+     */
+	async changeQty(orderNumber, itemId, qty) {
+		const inputs = Array.from(arguments)
+		for(let i=0; i<inputs.length;i++) if(inputs[i]<0 || inputs[i]===0) throw new Error('Invalid data')
+		let sql = 'SELECT order_number from orders;'
+		const orders = await this.db.all(sql)
+		const idList = []
+		for(const orderNum of orders) idList.push(orderNum.order_number)
+		if(!idList.includes(orderNumber)) throw new Error('Inexisting order')
+		sql = `SELECT COUNT(item_id) AS count FROM order_item WHERE item_id = ${itemId} AND order_id = ${orderNumber};`
+		const items = await this.db.get(sql)
+		if(!items.count) throw new Error('Item not in basket')
+		sql = `SELECT qty FROM items WHERE id = '${itemId}';`
+		const item = await this.db.get(sql)
+		if(item.qty < qty) throw new Error('Quantity is not available')
+		sql = `UPDATE order_item SET qty = ${qty} WHERE order_id = ${orderNumber} AND item_id = ${itemId};`
+		await this.db.run(sql)
+		console.log('Updated Successfully')
+		return true
+	}
+
 	async testSetup() {
 		const users = [
 			'INSERT INTO stores(qr_code, name, address) VALUES("1000000001", "Tesco", "56-66 Cambridge Street")',
@@ -129,7 +156,7 @@ class Items {
 			'INSERT INTO items(description, price, qty, barcode, store_id)\
             VALUES("Honey", 1.99, 1, "00369626", 1)',
 			'INSERT INTO items(description, price, qty, barcode, store_id)\
-            VALUES("Hell ENERGY DRINK", 0.50, 1, "00797656", 1)',
+            VALUES("Hell ENERGY DRINK", 0.50, 2, "00797656", 1)',
 			'INSERT INTO items(description, price, qty, barcode, store_id) VALUES("Digestives", 1.79, 1, "00768764", 1)'
 		]
 		users.forEach( async sql => await this.db.run(sql))
