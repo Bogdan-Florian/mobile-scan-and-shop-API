@@ -60,6 +60,21 @@ class Items {
 		const data = await this.db.get(sql)
 		return data
 	}
+    
+    /**
+	 * get item by qrcode
+	 * @param {String} barcode - the selected barcode
+	 * @returns {Object} Returns object with item details
+	 */
+	async getItems(qrcode) {
+		let sql = `SELECT COUNT(qr_code) AS count FROM stores WHERE qr_code = ${qrcode};`
+		const qrcodes = await this.db.get(sql)
+		if(!qrcodes.count) throw new Error('Not existing store')
+		sql = `SELECT * FROM items WHERE store_id = ${qrcode}`
+		const data = await this.db.all(sql)
+        console.log(data)
+		return data
+	}
 
 	/**
 	 * get all items from the basket

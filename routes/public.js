@@ -220,6 +220,31 @@ router.put('/orders/:order_number/:status', async ctx => {
 	}
 })
 
+router.get('/items/:qr_code', async ctx => {
+	console.log('GET /items/qr_code')
+	const items = await new Items(dbName)
+	try {
+		console.log(ctx.params.qr_code)
+		const record = await items.getItems(parseInt(ctx.params.qr_code))
+		const response = {
+			status: 'success',
+			data: record
+		}
+		// finally send the http response
+		ctx.response.status = 200
+		const rows = 2
+		ctx.response.body = JSON.stringify(response, null, rows)
+	} catch(err) {
+		console.log(err)
+		ctx.response.status = 400
+		ctx.response.body = {
+			status: 'fail',
+			msg: err.message
+		}
+	} finally {
+		await items.close()
+	}
+})
 
 
 
