@@ -48,7 +48,7 @@ class Orders {
      * @param {String} status the state of the order
      * @param {String} time_order the time at which the order was inserted
      * @param {Number} user_id the id of the user that inserts the order
-     * @returns {Boolean} return true if the order was inserted
+     * @returns {Object} return the last order number
      */
 	async insert(status,timeOrder,userId) {
 		let sql = `SELECT COUNT(id) AS count FROM accounts WHERE id = '${userId}';`
@@ -57,7 +57,9 @@ class Orders {
 		sql = `INSERT INTO orders(status,time_created, user_id) \
                  VALUES('${status}', '${timeOrder}', ${userId});`
 		await this.db.run(sql)
-		return true
+        sql = `SELECT order_number FROM orders ORDER BY time_created DESC LIMIT 0,1`
+        const order = await this.db.get(sql)
+		return order
 	}
 
 	/**

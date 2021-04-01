@@ -151,19 +151,23 @@ router.get('/orders/:order_number', async ctx => {
 })
 
 router.post('/orders', async ctx => {
-	console.log('POST /order')
+	console.log('POST /orders')
 	const orders = await new Orders(dbName)
 	const accounts = await new Accounts(dbName)
+    const items = await new Items(dbName)
 	const currentTime = await new Date()
 	try {
         ctx.set('Allow', 'GET, POST')
 		const data = ctx.request.body
+        console.log(data)
 		const userId = await accounts.getUserId(data.username)
-		await orders.insert(data.status, currentTime, userId)
+		const record = await orders.insert(data.status, currentTime, userId)
+        console.log(record)
+        await items.addBasket(record.order_number, data.basket)
         const host = ctx.request.host
         const url = `https://${host}/orders`
-		ctx.response.status = 303
-		ctx.response.redirect(url)
+		ctx.response.status = 201
+		ctx.response.body = {status: 'success', msg:'order created'}
 	} catch(err) {
 		console.log(err)
 		ctx.response.status = 400

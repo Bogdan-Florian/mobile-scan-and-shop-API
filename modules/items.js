@@ -20,19 +20,21 @@ class Items {
 				this.db = dbName
 			}
 			let sql ='CREATE TABLE IF NOT EXISTS stores (\
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,\
-                    qr_code TEXT NOT NULL,\
-                    name TEXT NOT NULL,\
-                    address TEXT NOT NULL);'
+                      qr_code INTEGER PRIMARY KEY AUTOINCREMENT,\
+                      name TEXT NOT NULL,\
+                      address TEXT NOT NULL\
+                    );'
 			await this.db.run(sql)
 			sql = 'CREATE TABLE IF NOT EXISTS items(\
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,\
-                        description TEXT NOT NULL,\
-                        price DOUBLE(8, 2) NOT NULL,\
-                        qty INT NOT NULL,\
-                        barcode TEXT NOT NULL,\
-                        store_id INT NOT NULL,\
-                        FOREIGN KEY(store_id) REFERENCES stores(id));'
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,\
+                    description TEXT NOT NULL,\
+                    price DOUBLE(8, 2) NOT NULL,\
+                    qty INT NOT NULL,\
+                    barcode TEXT NOT NULL,\
+                    store_id INTEGER NOT NULL,\
+                    product_image BLOB NOT NULL,\
+                    FOREIGN KEY(store_id) REFERENCES stores(qr_code)\
+                );'
 			await this.db.run(sql)
 			sql = 'CREATE TABLE IF NOT EXISTS order_item(\
                     order_id INTEGER NOT NULL,\
@@ -91,78 +93,21 @@ class Items {
 		const data = await this.db.all(sql)
 		return data
 	}
-
-	/**
-     * add item to the basket
-     * @param {Number} orderNumber - the id of the order
-     * @param {Number} itemId - the id of the item
-     * @param {Number} qty - the quantity of the item
-     * @returns {Boolean} returns true if the item was added
-     */
-	async addItem(orderNumber, itemId, qty) {
-		const inputs = Array.from(arguments)
-		for(let i=0; i<inputs.length;i++) if(inputs[i]<0 || inputs[i]===0) throw new Error('Invalid data')
-		let sql = `SELECT COUNT(order_number) AS count FROM orders WHERE order_number = '${orderNumber}';`
-		const orders = await this.db.get(sql)
-		if(!orders.count) throw new Error('Inexisting order')
-		sql = `SELECT COUNT(id) AS count FROM items WHERE id = '${itemId}';`
-		const items = await this.db.get(sql)
-		if(!items.count) throw new Error('Inexisting item')
-		sql = `SELECT qty FROM items WHERE id = '${itemId}';`
-		const item = await this.db.get(sql)
-		if(item.qty < qty) throw new Error('Quantity is not available')
-		sql = `INSERT INTO order_item(order_id, item_id, qty)\
-                    VALUES(${orderNumber}, ${itemId}, ${qty});`
-		await this.db.run(sql)
-		return true
-	}
-
-	/**
-     * delete item from the basket
-     * @param {Number} orderNumber - the id of the order
-     * @param {Number} itemId - the id of the item
-     * @returns {Boolean} returns true if the item was deleted
-     */
-	async deleteItem(orderNumber, itemId) {
-		const inputs = Array.from(arguments)
-		for(let i=0; i<inputs.length;i++) if(inputs[i]<0 || inputs[i]===0) throw new Error('Invalid data')
-		let sql = `SELECT COUNT(order_id) AS count FROM order_item WHERE order_id = '${orderNumber}';`
-		const orders = await this.db.get(sql)
-		if(!orders.count) throw new Error('Inexisting order')
-		sql = `SELECT COUNT(item_id) AS count FROM order_item WHERE item_id = '${itemId}';`
-		const items = await this.db.get(sql)
-		if(!items.count) throw new Error('Item not in basket')
-		sql = `DELETE FROM order_item WHERE order_id=${orderNumber} AND item_id = ${itemId};`
-		await this.db.run(sql)
-		return true
-	}
-
-	/**
-     * updates the quantity of a specific item in the basket
-     * @param {Number} orderNumber - order's id
-     * @param {Number} itemId - the id of the item
-     * @param {Number} qty - the new qty
-     * @returns {Boolean} returns true if updated successfully
-     */
-	async changeQty(orderNumber, itemId, qty) {
-		const inputs = Array.from(arguments)
-		for(let i=0; i<inputs.length;i++) if(inputs[i]<0 || inputs[i]===0) throw new Error('Invalid data')
-		let sql = 'SELECT order_number from orders;'
-		const orders = await this.db.all(sql)
-		const idList = []
-		for(const orderNum of orders) idList.push(orderNum.order_number)
-		if(!idList.includes(orderNumber)) throw new Error('Inexisting order')
-		sql = `SELECT COUNT(item_id) AS count FROM order_item WHERE item_id = ${itemId} AND order_id = ${orderNumber};`
-		const items = await this.db.get(sql)
-		if(!items.count) throw new Error('Item not in basket')
-		sql = `SELECT qty FROM items WHERE id = '${itemId}';`
-		const item = await this.db.get(sql)
-		if(item.qty < qty) throw new Error('Quantity is not available')
-		sql = `UPDATE order_item SET qty = ${qty} WHERE order_id = ${orderNumber} AND item_id = ${itemId};`
-		await this.db.run(sql)
-		console.log('Updated Successfully')
-		return true
-	}
+    
+    /**
+	 * add all items from the basket
+	 * @param {Number} orderNumber - the id of the order
+	 * @param {Object[]} data - the list of items
+	 * @returns {Object} Returns object with items and their details
+	 */
+	async addBasket(order_number, data){
+        data.forEach(async (item) => {
+            let sql = `INSERT INTO order_item(order_id, item_id, qty) VALUES(${order_number}, ${item.id}, ${item.qty})`
+            console.log(sql)
+            await this.db.run(sql)
+        })
+        return true
+    }
 
 	async testSetup() {
 		const users = [
