@@ -36,7 +36,7 @@ class Orders {
      * @returns {Object[]} return list of all the orders
      */
     async getOrders(){
-        const sql = 'SELECT * FROM orders;'
+        const sql = 'SELECT order_number, status, user_id FROM orders;'
         const data = await this.db.all(sql)
         console.log(data)
         return data
