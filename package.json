@@ -21,12 +21,13 @@
 		"jsdoc": "node_modules/.bin/jsdoc -c jsdoc.conf",
 		"linter": "node_modules/.bin/eslint .",
 		"test": "ava",
-        "test:watch":"ava --watch",
-        "test:coverage":"c8 --check-coverage --lines 100 --functions 100 --branches 100 --exclude 'unitTests/**' ava"
+		"test:watch": "ava --watch",
+		"test:coverage": "c8 --check-coverage --lines 100 --functions 100 --branches 100 --exclude 'unitTests/**' ava"
 	},
 	"author": "",
 	"license": "ISC",
 	"dependencies": {
+		"Base64": "^1.1.0",
 		"bcrypt": "^5.0.0",
 		"bcrypt-promise": "^2.0.0",
 		"koa": "^2.13.0",
