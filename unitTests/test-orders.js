@@ -10,9 +10,9 @@ test('INSERT: insert with valid details', async test => {
 	const orders = await new Orders(db)
 	const currentDate = await new Date()
 	try{
-        await orders.insert('pending', currentDate, 1)
-        let sql = `SELECT order_number FROM orders ORDER BY time_created DESC LIMIT 0,1`
-        const order = await db.get(sql)
+		await orders.insert('pending', currentDate, 1)
+		const sql = 'SELECT order_number FROM orders ORDER BY time_created DESC LIMIT 0,1'
+		const order = await db.get(sql)
 		test.deepEqual(await orders.insert('pending', currentDate, 1), order)
 	} catch(err) {
 		console.log(err)
@@ -212,25 +212,25 @@ test('UPDATE: Invalid data', async test => {
 })
 
 test('GET: get all orders', async test => {
-    const db = await sqlite.open(':memory:')
+	const db = await sqlite.open(':memory:')
 	const accounts = await new Accounts(db)
 	accounts.testSetup()
 	const orders = await new Orders(db)
-	let currentTime = await new Date()
-    const time = currentTime.toGMTString()
+	const currentTime = await new Date()
+	const time = currentTime.toISOString()
 	try{
-		await orders.insert('pending', currentTime, 1)
+		await orders.insert('pending', time, 1)
 		const data = [
-          {
-            order_number: 1,
-            status: 'pending',
-            user_id: 1
-          }
-        ]
+			{
+				order_number: 1,
+				status: 'pending',
+				user_id: 1
+			}
+		]
 		test.deepEqual(await orders.getOrders(), data)
 	} catch(err) {
 		// 		console.log(err)
-        test.fail('error not thrown')
+		test.fail('error not thrown')
 	} finally {
 		db.close()
 	}

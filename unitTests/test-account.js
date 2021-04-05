@@ -6,7 +6,7 @@ test('REGISTER: register and log in with a valid details', async test => {
 	const account = await new Accounts()
 	try {
 		await account.register('snowj', 'password', 'snowj@gmail.com')
-	  const login = await account.login('snowj', 'password')
+	  const login = await account.login({ username: 'snowj', password: 'password' })
 		test.is(login, true, 'login failed')
 	} catch(err) {
 		console.log(err.message)
@@ -88,11 +88,11 @@ test('LOGIN: login with valid username and password', async test => {
 	const account = await new Accounts()
 	try {
 		await account.testSetup()
-		const login = await account.login('snewj', 'p455w0rd')
+		const login = await account.login({ username: 'snewj', password: 'p455w0rd' })
 		test.is(login, true, 'unable to log in')
 	} catch(err) {
-		test.fail('error thrown')
 		console.log(err)
+		test.fail('error thrown')
 	} finally {
 		account.close()
 	}
@@ -102,8 +102,8 @@ test('LOGIN: incorrect username', async test => {
 	test.plan(1)
 	const account = await new Accounts()
 	try {
-		await account.register('snowj', 'password', 'snowj@gmail.com')
-		await account.login('sanst', 'password')
+		await account.register('snewj', 'password', 'snowj@gmail.com')
+		await account.login({ username: 'sanst', password: 'password' })
 		test.fail('error not thrown')
 	} catch(err) {
 		test.is(err.message, 'username "sanst" is incorrect', 'incorrect error thrown')
@@ -117,7 +117,7 @@ test('LOGIN: incorrect password', async test => {
 	const account = await new Accounts()
 	try {
 		await account.register('snowj', 'password', 'snowj@gmail.com')
-		await account.login('snowj', 'parola')
+		await account.login({ username: 'snowj', password: 'parola' })
 		test.fail('error not thrown')
 	} catch(err) {
 		test.is(err.message, 'incorrect password for user "snowj"', 'incorrect error thrown')

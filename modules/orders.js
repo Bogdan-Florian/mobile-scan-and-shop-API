@@ -30,18 +30,18 @@ class Orders {
 			return this
 		})()
 	}
-    
-    /**
+
+	/**
      * Gets all the orders
      * @returns {Object[]} return list of all the orders
      */
-    async getOrders(){
-        const sql = 'SELECT order_number, status, user_id FROM orders;'
-        const data = await this.db.all(sql)
-        console.log(data)
-        return data
-    }
-    
+	async getOrders() {
+		const sql = 'SELECT order_number, status, user_id FROM orders;'
+		const data = await this.db.all(sql)
+		console.log(data)
+		return data
+	}
+
 
 	/**
      * Inserts a new order
@@ -57,8 +57,8 @@ class Orders {
 		sql = `INSERT INTO orders(status,time_created, user_id) \
                  VALUES('${status}', '${timeOrder}', ${userId});`
 		await this.db.run(sql)
-        sql = `SELECT order_number FROM orders ORDER BY time_created DESC LIMIT 0,1`
-        const order = await this.db.get(sql)
+		sql = 'SELECT order_number FROM orders ORDER BY time_created DESC LIMIT 0,1'
+		const order = await this.db.get(sql)
 		return order
 	}
 
@@ -73,7 +73,7 @@ class Orders {
 		const orders = await this.db.all(sql)
 		const idList = []
 		for(const orderNum of orders) idList.push(orderNum.order_number)
-        console.log(idList, id)
+		console.log(idList, id)
 		if(!idList.includes(id)) throw new Error('Not existing order')
 		sql = `SELECT order_number, status, time_created, user_id FROM orders WHERE order_number = ${id};`
 		const order = await this.db.get(sql)

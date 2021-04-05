@@ -57,7 +57,9 @@ class Accounts {
 	 * @param {String} password - the password to check
 	 * @returns {Boolean} return true if credentials are valid
 	 */
-	async login(username, password) {
+	async login(credentials) {
+		console.log(credentials)
+		const {username, password} = credentials
 		let sql = `SELECT count(id) AS number FROM accounts WHERE username="${username}";`
 		const records = await this.db.get(sql)
 		if(!records.number) throw new Error(`username "${username}" is incorrect`)
