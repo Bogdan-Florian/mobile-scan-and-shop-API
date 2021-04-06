@@ -87,7 +87,7 @@ class Items {
 		let sql = `SELECT COUNT(order_id) AS count FROM order_item WHERE order_id = '${orderNumber}';`
 		const orders = await this.db.get(sql)
 		if(!orders.count) throw new Error('Inexisting order')
-		sql = `SELECT order_item.item_id, items.description, items.price, order_item.qty AS qty FROM items, order_item \
+		sql = `SELECT order_item.item_id, items.description, items.product_image, items.price, order_item.qty AS qty FROM items, order_item \
                 WHERE order_item.item_id = items.id AND order_item.order_id = ${orderNumber}`
 		const data = await this.db.all(sql)
 		return data
