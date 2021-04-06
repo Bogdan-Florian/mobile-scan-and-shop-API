@@ -103,7 +103,7 @@ router.get('/orders', async ctx => {
 	try {
 		ctx.set('Allow', 'GET, POST')
 		const host = ctx.request.host
-		const record = await orders.getOrders()
+		const record = await orders.getOrders(username)
 		record.forEach(order => {
 			order.url = `https://${host}/orders/${order.order_number}`
 		})
