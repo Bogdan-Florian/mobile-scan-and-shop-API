@@ -35,8 +35,12 @@ class Orders {
      * Gets all the orders
      * @returns {Object[]} return list of all the orders
      */
-	async getOrders() {
-		const sql = 'SELECT order_number, status, user_id FROM orders;'
+	async getOrders(username) {
+        if(typeof username !== 'string') throw new Error('Invalid data')
+        let sql = `SELECT COUNT(id) AS count FROM accounts WHERE username = '${username}';`
+		const id = await this.db.get(sql)
+		if(!id.count) throw new Error('Inexistent user')
+		sql = `SELECT orders.order_number, orders.status, orders.time_created FROM orders, accounts WHERE orders.user_id = accounts.id AND accounts.username = '${username}' ORDER BY orders.time_created DESC;`
 		const data = await this.db.all(sql)
 		console.log(data)
 		return data

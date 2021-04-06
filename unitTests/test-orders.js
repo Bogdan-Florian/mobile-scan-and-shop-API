@@ -221,16 +221,54 @@ test('GET: get all orders', async test => {
 	try{
 		await orders.insert('pending', time, 1)
 		const data = [
-			{
-				order_number: 1,
-				status: 'pending',
-				user_id: 1
-			}
-		]
-		test.deepEqual(await orders.getOrders(), data)
+                    {
+                    order_number: 1,
+                    status: 'pending',
+                    time_created: time
+                    }
+                ]
+		test.deepEqual(await orders.getOrders('snewj'), data)
 	} catch(err) {
-		// 		console.log(err)
-		test.fail('error not thrown')
+        console.log(err)
+		test.fail('error thrown')
+	} finally {
+		db.close()
+	}
+})
+
+test('GET: get all orders - inexistent user', async test => {
+	const db = await sqlite.open(':memory:')
+	const accounts = await new Accounts(db)
+	accounts.testSetup()
+	const orders = await new Orders(db)
+	const currentTime = await new Date()
+	const time = currentTime.toISOString()
+	try{
+		await orders.insert('pending', time, 1)
+        await orders.getOrders('snowj')
+        test.fail('error not thrown')
+	} catch(err) {
+        console.log(err)
+		test.is(err.message, 'Inexistent user')
+	} finally {
+		db.close()
+	}
+})
+
+test('GET: get all orders - invalid data', async test => {
+	const db = await sqlite.open(':memory:')
+	const accounts = await new Accounts(db)
+	accounts.testSetup()
+	const orders = await new Orders(db)
+	const currentTime = await new Date()
+	const time = currentTime.toISOString()
+	try{
+		await orders.insert('pending', time, 1)
+        await orders.getOrders()
+        test.fail('error not thrown')
+	} catch(err) {
+        console.log(err)
+		test.is(err.message, 'Invalid data')
 	} finally {
 		db.close()
 	}
